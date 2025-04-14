@@ -55,5 +55,11 @@ namespace MyGame.value
 
         /** ƒmƒ‹ƒ}‹àŠz */
         public int currentNorma = 0;
+
+        /** ”„‹pŠÔŠu */
+        public float sellInterval = 5f;
+
+        /** ”„‹pƒ^ƒCƒ}[ */
+        public float sellTimer = 0f;
     }
 }

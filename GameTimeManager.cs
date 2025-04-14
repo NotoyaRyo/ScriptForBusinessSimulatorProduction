@@ -16,7 +16,7 @@ namespace MyGame
         {
         }
 
-        void Start()
+        protected void Start()
         {
             uIObjectValue = GameManager.Instance.UIObjValue;
             gameValue = GameManager.Instance.GmValue;
@@ -37,10 +37,19 @@ namespace MyGame
             gameValue.isBusinessTime = true; // 営業中
         }
 
-        void Update()
+        protected void Update()
         {
+            // 
+            gameValue.sellTimer += Time.deltaTime;
+            if (gameValue.sellTimer >= gameValue.sellInterval)
+            {
+                gameValue.sellTimer = 0f;
+                gameRuleManager.TrySellItem(); // 売れるか判定
+            }
+
+            // 時間の進行度を更新
             gameValue.progSeconds += Time.deltaTime;
-            if (gameValue.progSeconds >= 1f) // 1秒経過
+            if (gameValue.progSeconds >= 10f) // 1秒経過
             {
                 if ((9 <= gameValue.hour) && (gameValue.hour <= 16))
                 {
@@ -67,7 +76,7 @@ namespace MyGame
             UpdateUI();
         }
 
-        void UpdateUI()
+        protected void UpdateUI()
         {
             // UIの更新処理をここに記述
             uIObjectValue.clockText.text = gameValue.hour.ToString("D2") + ":00"; // 時間を2桁表示
