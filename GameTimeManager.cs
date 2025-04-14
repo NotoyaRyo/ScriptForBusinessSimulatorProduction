@@ -1,56 +1,77 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
-using static MoneyManager;
-
-public class GameTimeManager : MonoBehaviour
+namespace MyGame
 {
-    public MoneyManager moneyManager; // MoneyManagerのインスタンスを参照するための変数
+    using UnityEngine;
+    using TMPro;
+    using MyGame.value;
 
-    public TextMeshProUGUI clockText;
-
-    public int hour = 0; // 時間
-    protected float progSeconds = 0; // 時間の進行度（秒）
-    public bool isBusinessTime = true; // 現在営業中かどうかのフラグ
-
-    int day = 1; // 1日目からスタート
-
-    void Start()
+    [System.Serializable]
+    public class GameTimeManager : MonoBehaviour
     {
-        hour = 9; // 初期時間を9時に設定
-        progSeconds = 0; // 時間の進行度を初期化
-        isBusinessTime = true; // 初期状態は営業中
+        protected UIObjectValue uIObjectValue; // UIオブジェクトValue
+        protected GameValue gameValue; // ゲーム内変数Value
 
-        UpdateUI();
-    }
+        protected GameRuleManager gameRuleManager; // GameRuleManagerのインスタンス
 
-    void Update()
-    {
-        progSeconds += Time.deltaTime;
-        if (progSeconds >= 2f) // 2秒経過
+        protected void Awake()
         {
-            if ((9 <= hour) && (hour <= 16))
-            {
-                isBusinessTime = true; // 営業中
-                hour++; // 時間を1時間進める
-            }
-            if(hour == 17)
-            {
-                isBusinessTime = false; // 営業終了
-                moneyManager.resultPanel.SetActive(true); // 結果パネルを表示
-                moneyManager.OnEnable();
-            }
-            
-            progSeconds = 0; // 時間の進行度をリセット
         }
 
-        UpdateUI();
-    }
+        void Start()
+        {
+            uIObjectValue = GameManager.Instance.UIObjValue;
+            gameValue = GameManager.Instance.GmValue;
+            gameRuleManager = GameManager.Instance.RuleManager;
 
-    void UpdateUI()
-    {
-        // UIの更新処理をここに記述
-        clockText.text = hour.ToString("D2") + ":00"; // 時間を2桁表示
-    }
+            init();
 
+            UpdateUI();
+        }
+
+        /**
+         * 初期化処理
+         */
+        protected void init()
+        {
+            gameValue.hour = 9; // 初期時間を9時に設定
+            gameValue.progSeconds = 0;
+            gameValue.isBusinessTime = true; // 営業中
+        }
+
+        void Update()
+        {
+            gameValue.progSeconds += Time.deltaTime;
+            if (gameValue.progSeconds >= 1f) // 1秒経過
+            {
+                if ((9 <= gameValue.hour) && (gameValue.hour <= 16))
+                {
+                    gameValue.isBusinessTime = true; // 営業中
+                    gameValue.hour++; // 時間を1時間進める
+                }
+                if (gameValue.hour == 17)
+                {
+                    gameValue.isBusinessTime = false; // 営業終了
+
+                    if (gameValue.day == gameValue.nextNormaDay)
+                    {
+                        // ノルマ判定用の関数を呼ぶ
+                        gameRuleManager.CheckNorma();
+                    }
+
+                    // 営業終了時の処理
+                    uIObjectValue.SetResultPanelActive(true); // 結果パネルを表示
+                }
+
+                gameValue.progSeconds = 0; // 時間の進行度をリセット
+            }
+
+            UpdateUI();
+        }
+
+        void UpdateUI()
+        {
+            // UIの更新処理をここに記述
+            uIObjectValue.clockText.text = gameValue.hour.ToString("D2") + ":00"; // 時間を2桁表示
+        }
+
+    }
 }
